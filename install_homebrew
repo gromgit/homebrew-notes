@@ -1,0 +1,42 @@
+#!/bin/bash
+set -e
+if [[ $(uname) == Darwin ]]; then
+  default_prefix=/usr/local
+else
+  default_prefix=/home/linuxbrew/.linuxbrew
+fi
+root=${HOMEBREW_PREFIX:-$default_prefix}
+
+# Try the official method first if we're using the default location
+if [[ $root != $default_prefix ]] || ! /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"; then
+  # That didn't work, so...
+  mkdir -p ${root}/bin
+  git clone https://github.com/Homebrew/brew ${root}/Homebrew
+  ln -s ${root}/Homebrew/bin/brew ${root}/bin
+  cat <<EOF
+==> Manual Homebrew installation complete!
+    Run the following in your shell to continue:
+
+  eval \$(${root}/bin/brew shellenv)
+EOF
+fi
+
+# Add some post-install instructions
+cat <<EOF
+
+==> Add the following to your ~/.profile:
+
+  if [[ -x ${root}/bin/brew ]]; then
+    eval "\$(${root}/bin/brew shellenv)"
+  else
+    echo "*** WARNING: Homebrew not found! ***"
+  fi
+
+==> Optional: If you want to keep EVERYTHING under $root
+    for easier uninstallation, add to your ~/.profile:
+
+  export HOMEBREW_TEMP=\${HOMEBREW_PREFIX}/tmp
+  export HOMEBREW_CACHE=\${HOMEBREW_PREFIX}/.cache
+  export HOMEBREW_LOGS=\${HOMEBREW_PREFIX}/.logs
+
+EOF
